@@ -1,0 +1,15 @@
+{
+  "name": "job-tracker",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Full-stack job tracker (Express + React)",
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,magenta \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}
