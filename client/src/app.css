@@ -134,13 +134,229 @@ a {
   font-size: 14px;
 }
 
-.board-empty {
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-email {
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .header-email {
+    display: none;
+  }
+}
+
+.btn-inline {
+  width: auto;
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+/* ---- Board ---- */
+
+.board-wrap {
+  flex: 1;
+  padding: 20px 24px;
+  overflow-x: auto;
+}
+
+.board {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(240px, 1fr);
+  gap: 16px;
+  min-height: 100%;
+  align-items: start;
+}
+
+.column {
+  background: var(--social-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  min-width: 240px;
+}
+
+.column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.column-title {
+  font-weight: 600;
+  color: var(--text-h);
+  font-size: 15px;
+}
+
+.column-count {
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 9px;
+}
+
+.column-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.column-empty {
+  font-size: 13px;
+  color: var(--text);
+  opacity: 0.7;
+  padding: 8px 4px;
+}
+
+/* ---- Card ---- */
+
+.card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: var(--shadow);
+}
+
+.card-company {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.card-role {
+  margin: 2px 0 0;
+  font-size: 14px;
+}
+
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.card.skeleton {
+  height: 64px;
+  opacity: 0.5;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Board-level messages (empty / error). */
+.board-message {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 8px;
-  padding: 24px;
+  gap: 10px;
+  padding: 48px 24px;
+}
+
+/* ---- Modal + form ---- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.modal-panel {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 460px;
+  padding: 20px 24px 24px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.modal-header h2 {
+  margin: 0;
+}
+
+.modal-close {
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--text);
+  padding: 0 4px;
+}
+
+.app-form .field {
+  margin-bottom: 14px;
+}
+
+.field select,
+.field textarea {
+  font: inherit;
+  font-size: 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+
+.field-row .field {
+  flex: 1;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.form-actions .btn-primary,
+.form-actions .btn-ghost {
+  width: auto;
+  padding: 10px 18px;
 }
