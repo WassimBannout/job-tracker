@@ -11,9 +11,10 @@
 > Living section — reflects what's actually built, not just planned. Build order
 > and technical detail live in [`TECH_PLAN.md`](./TECH_PLAN.md) §7.
 
-**Overall: ~4 of 8 build slices complete.** Accounts work end-to-end, the CRUD
-API is in place, and the board now renders applications by stage and supports
-adding one. Editing, deleting, and drag-to-move are next.
+**Overall: ~5 of 8 build slices complete.** Accounts, the CRUD API, and a board
+where you can add, edit, and delete applications all work. The one remaining
+core interaction is moving a card between stages by drag-and-drop (edit already
+lets you change stage via a dropdown).
 
 **Legend:** ✅ Done · 🟡 In progress · ⬜ Not started
 
@@ -23,7 +24,7 @@ adding one. Editing, deleting, and drag-to-move are next.
 | 2. Auth end-to-end | signup / login / logout / me, password hashing | ✅ Done |
 | 3. Applications CRUD (API) | list / create / read / update / delete + ownership | ✅ Done |
 | 4. Board read + Add | board, per-stage counts, empty/loading/error, add form | ✅ Done |
-| 5. Edit + Delete | shared edit form, confirm-delete dialog | ⬜ Not started |
+| 5. Edit + Delete | shared edit form, confirm-delete dialog | ✅ Done |
 | 6. Move | drag-and-drop + keyboard/mobile fallback, optimistic update | ⬜ Not started |
 | 7. Password reset | forgot/reset endpoints + token flow + pages | ⬜ Not started |
 | 8. Polish / NFR pass | responsive, accessibility, performance check | ⬜ Not started |
@@ -54,27 +55,32 @@ adding one. Editing, deleting, and drag-to-move are next.
   covering CRUD happy paths, validation, auth, and the **release-blocking
   cross-user isolation** case (user B gets 404 on user A's record for
   read/edit/delete, and never sees it in their list). 6/6 passing.
-- **Board UI (read + add)** — TanStack Query data layer; a five-column board
-  grouping applications by stage with per-column counts; loading skeletons,
-  an error state with retry, an account-level empty state with a primary CTA,
-  and empty-column hints; an accessible add-application modal (labelled dialog,
-  Esc/backdrop close, focus management) with all §7.1 fields, inline field/API
-  validation errors, and a refetch on success. Cards are display-only for now.
+- **Board UI (read + add + edit + delete)** — TanStack Query data layer; a
+  five-column board grouping applications by stage with per-column counts;
+  loading skeletons, an error state with retry, an account-level empty state
+  with a primary CTA, and empty-column hints. An accessible modal (labelled
+  dialog, Esc/backdrop close, focus management) hosts both the add form and the
+  reused edit form (all §7.1 fields, inline field/API validation errors). Cards
+  carry Edit/Delete controls; delete goes through a confirm dialog naming the
+  application and warning it's permanent (hard delete). Emptying an optional
+  field on edit clears it (sent as `null`).
 - **Verified end-to-end** (through the Vite proxy, cookies included): sign up →
   session → board; duplicate email → 409; weak password → 400 field error; wrong
   password / unknown email → identical 401; logout clears the session; empty
-  board → add → the new card appears in the correct stage column with updated
-  counts.
+  board → add → card appears in the correct column with updated counts; edit
+  changes fields and can clear one; delete removes the card (then 404). Server
+  suite 7/7 including cross-user isolation and create-null / PATCH-clear.
 
-**Not yet built:** editing and deleting applications, drag-to-move between
-stages (plus its keyboard/mobile fallback), and password reset.
+**Not yet built:** drag-to-move between stages (plus its keyboard/mobile
+fallback), and password reset.
 
 **Requirement coverage so far:**
 
 - §6 Epic A (sign up / log in / log out) — ✅ implemented and verified
   (password-reset story A4 still pending, Slice 7).
-- §6 Epic B — 🟡 B1 (add) and B2 (view board) done; B3 (move), B4 (edit),
-  B5 (delete) pending (Slices 5–6).
+- §6 Epic B — 🟡 B1 (add), B2 (view board), B4 (edit), and B5 (delete) done;
+  B3 (drag-to-move) pending (Slice 6). Note stage can already be changed via the
+  edit form's stage dropdown.
 - §7.1 data model — ✅ implemented and exposed via the CRUD API and the add form.
 - §7.2 pipeline stages — ✅ defined, validated, and rendered as board columns;
   stage move via `PATCH` (UI move pending Slice 6).

@@ -61,10 +61,12 @@ export const createApplicationSchema = z.object({
   company,
   role,
   stage: stageSchema.default("Wishlist"),
-  jobUrl: jobUrl.optional(),
-  location: location.optional(),
-  dateApplied: dateApplied.optional(),
-  notes: notes.optional(),
+  // Optionals accept null as well as absent, so the same form payload works for
+  // create and edit (edit sends null to clear a previously-set field).
+  jobUrl: jobUrl.nullish(),
+  location: location.nullish(),
+  dateApplied: dateApplied.nullish(),
+  notes: notes.nullish(),
 });
 export type CreateApplicationInput = z.infer<typeof createApplicationSchema>;
 

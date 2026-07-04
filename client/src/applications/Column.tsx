@@ -5,9 +5,13 @@ import { ApplicationCard } from "./ApplicationCard";
 export function Column({
   stage,
   applications,
+  onEdit,
+  onDelete,
 }: {
   stage: Stage;
   applications: Application[];
+  onEdit: (application: Application) => void;
+  onDelete: (application: Application) => void;
 }) {
   return (
     <section className="column" aria-label={stage}>
@@ -23,7 +27,12 @@ export function Column({
           <p className="column-empty">No applications here</p>
         ) : (
           applications.map((app) => (
-            <ApplicationCard key={app.id} application={app} />
+            <ApplicationCard
+              key={app.id}
+              application={app}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
           ))
         )}
       </div>

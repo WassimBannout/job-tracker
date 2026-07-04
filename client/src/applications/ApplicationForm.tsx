@@ -2,14 +2,14 @@ import { useState, type FormEvent } from "react";
 import { ApiRequestError } from "../lib/api";
 import {
   STAGES,
-  type CreateApplicationInput,
+  type ApplicationInput,
   type Stage,
 } from "../lib/applications";
 
 type Props = {
-  initial?: Partial<CreateApplicationInput>;
+  initial?: Partial<ApplicationInput>;
   submitLabel: string;
-  onSubmit: (input: CreateApplicationInput) => Promise<void>;
+  onSubmit: (input: ApplicationInput) => Promise<void>;
   onCancel: () => void;
 };
 
@@ -26,7 +26,10 @@ export function ApplicationForm({
   const [stage, setStage] = useState<Stage>(initial?.stage ?? "Wishlist");
   const [jobUrl, setJobUrl] = useState(initial?.jobUrl ?? "");
   const [location, setLocation] = useState(initial?.location ?? "");
-  const [dateApplied, setDateApplied] = useState(initial?.dateApplied ?? "");
+  // A <input type="date"> needs a yyyy-mm-dd value.
+  const [dateApplied, setDateApplied] = useState(
+    initial?.dateApplied ? initial.dateApplied.slice(0, 10) : "",
+  );
   const [notes, setNotes] = useState(initial?.notes ?? "");
 
   const [fields, setFields] = useState<Record<string, string>>({});
@@ -38,20 +41,20 @@ export function ApplicationForm({
     setFields({});
     setFormError(null);
 
-    const trimmed = (v: string) => v.trim();
-    const optional = (v: string) => {
+    // Emptied optionals become null so an edit can clear a previously-set value.
+    const orNull = (v: string) => {
       const t = v.trim();
-      return t === "" ? undefined : t;
+      return t === "" ? null : t;
     };
 
-    const input: CreateApplicationInput = {
-      company: trimmed(company),
-      role: trimmed(role),
+    const input: ApplicationInput = {
+      company: company.trim(),
+      role: role.trim(),
       stage,
-      jobUrl: optional(jobUrl),
-      location: optional(location),
-      dateApplied: optional(dateApplied),
-      notes: optional(notes),
+      jobUrl: orNull(jobUrl),
+      location: orNull(location),
+      dateApplied: orNull(dateApplied),
+      notes: orNull(notes),
     };
 
     setSubmitting(true);
