@@ -11,9 +11,9 @@
 > Living section — reflects what's actually built, not just planned. Build order
 > and technical detail live in [`TECH_PLAN.md`](./TECH_PLAN.md) §7.
 
-**Overall: ~2 of 8 build slices complete.** Accounts work end-to-end (sign up,
-log in, log out) with a guarded, placeholder board; no application features or
-real board yet.
+**Overall: ~3 of 8 build slices complete.** Accounts work end-to-end and the
+full application CRUD API (with ownership enforcement + isolation tests) is in
+place. No board/UI for applications yet — that's next.
 
 **Legend:** ✅ Done · 🟡 In progress · ⬜ Not started
 
@@ -21,7 +21,7 @@ real board yet.
 |-------|-------|--------|
 | 1. Foundation | DB + models, validation, error shape, auth middleware | ✅ Done |
 | 2. Auth end-to-end | signup / login / logout / me, password hashing | ✅ Done |
-| 3. Applications CRUD (API) | list / create / read / update / delete + ownership | ⬜ Not started |
+| 3. Applications CRUD (API) | list / create / read / update / delete + ownership | ✅ Done |
 | 4. Board read + Add | board, per-stage counts, empty/loading/error, add form | ⬜ Not started |
 | 5. Edit + Delete | shared edit form, confirm-delete dialog | ⬜ Not started |
 | 6. Move | drag-and-drop + keyboard/mobile fallback, optimistic update | ⬜ Not started |
@@ -45,23 +45,33 @@ real board yet.
 - **Auth (client)** — React Router app with an `AuthProvider` (bootstraps via
   `/me`), a `RequireAuth` guard that redirects to `/login`, login + signup pages
   with inline field/validation errors, and a placeholder board with log-out.
+- **Applications API** — `GET/POST /api/applications` and
+  `GET/PATCH/DELETE /api/applications/:id`, all behind `requireAuth`. `ownerId`
+  is taken from the session; ownership is part of every query; a non-owned `:id`
+  returns 404 (never reveals another user's record). `PATCH` also serves the
+  stage "move". Hard delete per resolved scope.
+- **Tests** — integration suite (node:test + supertest, dedicated test DB)
+  covering CRUD happy paths, validation, auth, and the **release-blocking
+  cross-user isolation** case (user B gets 404 on user A's record for
+  read/edit/delete, and never sees it in their list). 6/6 passing.
 - **Verified end-to-end** (through the Vite proxy, cookies included): sign up →
   session → board; duplicate email → 409; weak password → 400 field error; wrong
   password / unknown email → identical 401; logout clears the session.
 
-**Not yet built:** all application CRUD, the real board (columns, cards,
-counts), adding/editing/moving/deleting applications, and password reset. Of the
-§6 user stories, only Epic A (accounts) is demoable — Epic B is pending.
+**Not yet built:** the real board (columns, cards, counts) and the UI to
+add/edit/move/delete applications, plus password reset. The CRUD API exists but
+has no front-end yet, so §6 Epic B is not demoable in the app.
 
 **Requirement coverage so far:**
 
 - §6 Epic A (sign up / log in / log out) — ✅ implemented and verified
   (password-reset story A4 still pending, Slice 7).
-- §7.1 data model — ✅ at the schema level (not yet exposed via a CRUD API).
-- §7.2 pipeline stages — ✅ defined and validated.
-- §8.1 authorization — 🟡 auth, sessions, and the guard are in place; per-record
-  ownership checks and the release-blocking cross-user isolation tests come with
-  Slice 3.
+- §6 Epic B (manage applications) — 🟡 API complete; no UI yet.
+- §7.1 data model — ✅ implemented and exposed via the CRUD API.
+- §7.2 pipeline stages — ✅ defined and validated; stage move via `PATCH`.
+- §8.1 authorization — ✅ per-record ownership enforced and covered by the
+  cross-user isolation tests. (Other NFRs — performance, a11y, responsive — come
+  with the UI slices and the Slice 8 polish pass.)
 - All other functional/NFR requirements — ⬜ pending their slice above.
 
 **Open item blocking a later slice:** password reset (Slice 7) still needs an
