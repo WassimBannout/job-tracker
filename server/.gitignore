@@ -1,0 +1,6 @@
+# Generated Prisma client (regenerated via `prisma generate`)
+src/generated/
+
+# SQLite dev database
+*.db
+*.db-journal

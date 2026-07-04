@@ -1,0 +1,54 @@
+// Job Tracker — data model (MVP, Slice 1)
+// See docs/TECH_PLAN.md §3. SQLite has no native enums, so `stage` is a String
+// validated by Zod (src/schemas). `ownerId` is the basis of data isolation.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  applications Application[]
+  resetTokens  PasswordResetToken[]
+}
+
+model Application {
+  id          String   @id @default(cuid())
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  company     String
+  role        String
+  stage       String   @default("Wishlist") // Wishlist|Applied|Interviewing|Offer|Rejected
+  jobUrl      String?
+  location    String?
+  dateApplied DateTime?
+  notes       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([ownerId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
