@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import session from "express-session";
-import { requireAuth } from "./middleware/auth.js";
+import { authRouter } from "./routes/auth.js";
 import { errorHandler } from "./errors.js";
 
 const app = express();
@@ -30,10 +30,7 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-// Temporary probe that the auth middleware works. Real routes arrive in Slice 2.
-app.get("/api/me", requireAuth, (req, res) => {
-  res.json({ userId: req.session.userId });
-});
+app.use("/api/auth", authRouter);
 
 // Error handler must be registered last.
 app.use(errorHandler);
