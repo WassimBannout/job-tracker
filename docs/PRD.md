@@ -11,15 +11,16 @@
 > Living section — reflects what's actually built, not just planned. Build order
 > and technical detail live in [`TECH_PLAN.md`](./TECH_PLAN.md) §7.
 
-**Overall: ~1 of 8 build slices complete.** The server foundation is in place;
-no user-facing features are usable yet (no auth endpoints, no UI).
+**Overall: ~2 of 8 build slices complete.** Accounts work end-to-end (sign up,
+log in, log out) with a guarded, placeholder board; no application features or
+real board yet.
 
 **Legend:** ✅ Done · 🟡 In progress · ⬜ Not started
 
 | Slice | Scope | Status |
 |-------|-------|--------|
 | 1. Foundation | DB + models, validation, error shape, auth middleware | ✅ Done |
-| 2. Auth end-to-end | signup / login / logout / me, password hashing | ⬜ Not started |
+| 2. Auth end-to-end | signup / login / logout / me, password hashing | ✅ Done |
 | 3. Applications CRUD (API) | list / create / read / update / delete + ownership | ⬜ Not started |
 | 4. Board read + Add | board, per-stage counts, empty/loading/error, add form | ⬜ Not started |
 | 5. Edit + Delete | shared edit form, confirm-delete dialog | ⬜ Not started |
@@ -27,7 +28,7 @@ no user-facing features are usable yet (no auth endpoints, no UI).
 | 7. Password reset | forgot/reset endpoints + token flow + pages | ⬜ Not started |
 | 8. Polish / NFR pass | responsive, accessibility, performance check | ⬜ Not started |
 
-**What exists today (Slice 1):**
+**What exists today (Slices 1–2):**
 
 - **Database** — Prisma 7 + SQLite with the `User`, `Application`, and
   `PasswordResetToken` models from §7.1. `Application.ownerId` is indexed and
@@ -37,20 +38,30 @@ no user-facing features are usable yet (no auth endpoints, no UI).
 - **Error handling** — a consistent API error shape
   (`{ error: { code, message, fields? } }`) with automatic validation-error
   flattening.
-- **Auth plumbing** — cookie-based sessions (httpOnly, SameSite=Lax) and a
-  `requireAuth` middleware. Verified: an unauthenticated request to a protected
-  route returns `401` in the correct shape, and the DB connects.
+- **Auth (server)** — `signup` / `login` / `logout` / `me` endpoints with
+  bcrypt password hashing (cost 12), cookie sessions (httpOnly, SameSite=Lax),
+  and non-enumerating errors on duplicate signup and failed login (constant-time
+  compare on unknown emails).
+- **Auth (client)** — React Router app with an `AuthProvider` (bootstraps via
+  `/me`), a `RequireAuth` guard that redirects to `/login`, login + signup pages
+  with inline field/validation errors, and a placeholder board with log-out.
+- **Verified end-to-end** (through the Vite proxy, cookies included): sign up →
+  session → board; duplicate email → 409; weak password → 400 field error; wrong
+  password / unknown email → identical 401; logout clears the session.
 
-**Not yet built (everything user-facing):** account creation/login, password
-hashing, all application CRUD, the board and any UI, moving/editing/deleting
-cards, and password reset. No feature from §6 (User Stories) is demoable yet.
+**Not yet built:** all application CRUD, the real board (columns, cards,
+counts), adding/editing/moving/deleting applications, and password reset. Of the
+§6 user stories, only Epic A (accounts) is demoable — Epic B is pending.
 
 **Requirement coverage so far:**
 
-- §7.1 data model — ✅ implemented at the schema level (not yet exposed via API).
+- §6 Epic A (sign up / log in / log out) — ✅ implemented and verified
+  (password-reset story A4 still pending, Slice 7).
+- §7.1 data model — ✅ at the schema level (not yet exposed via a CRUD API).
 - §7.2 pipeline stages — ✅ defined and validated.
-- §8.1 authorization — 🟡 middleware + session in place; per-record ownership
-  checks and the release-blocking cross-user isolation tests come with Slice 3.
+- §8.1 authorization — 🟡 auth, sessions, and the guard are in place; per-record
+  ownership checks and the release-blocking cross-user isolation tests come with
+  Slice 3.
 - All other functional/NFR requirements — ⬜ pending their slice above.
 
 **Open item blocking a later slice:** password reset (Slice 7) still needs an
