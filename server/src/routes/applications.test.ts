@@ -71,6 +71,27 @@ test("DELETE removes the application (then 404)", async () => {
   await alex.get(`/api/applications/${id}`).expect(404);
 });
 
+test("create accepts null optionals; PATCH can edit and clear a field", async () => {
+  const alex = await signInAs("alex@example.com");
+
+  const created = await alex
+    .post("/api/applications")
+    .send({ ...sampleApp, notes: "call recruiter", location: null })
+    .expect(201);
+  const id = created.body.application.id;
+  assert.equal(created.body.application.notes, "call recruiter");
+  assert.equal(created.body.application.location, null);
+
+  // Edit a field and clear another via null.
+  const edited = await alex
+    .patch(`/api/applications/${id}`)
+    .send({ role: "Staff Engineer", notes: null })
+    .expect(200);
+  assert.equal(edited.body.application.role, "Staff Engineer");
+  assert.equal(edited.body.application.notes, null);
+  assert.equal(edited.body.application.company, "Acme"); // untouched
+});
+
 // --- validation & auth -------------------------------------------------------
 
 test("create with missing required fields is 400 with field errors", async () => {

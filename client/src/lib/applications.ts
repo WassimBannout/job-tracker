@@ -27,16 +27,16 @@ export type Application = {
   updatedAt: string;
 };
 
-// Payload for creating an application. Empty optional fields are omitted by the
-// form before sending.
-export type CreateApplicationInput = {
+// Payload for creating/editing an application. The form sends null for emptied
+// optional fields (so edits can clear them); the server accepts null or absent.
+export type ApplicationInput = {
   company: string;
   role: string;
   stage: Stage;
-  jobUrl?: string;
-  location?: string;
-  dateApplied?: string;
-  notes?: string;
+  jobUrl: string | null;
+  location: string | null;
+  dateApplied: string | null;
+  notes: string | null;
 };
 
 const APPLICATIONS_KEY = ["applications"] as const;
@@ -54,10 +54,29 @@ export function useApplications() {
 export function useCreateApplication() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: CreateApplicationInput) =>
+    mutationFn: (input: ApplicationInput) =>
       api
         .post<{ application: Application }>("/api/applications", input)
         .then((res) => res.application),
+    onSuccess: () => qc.invalidateQueries({ queryKey: APPLICATIONS_KEY }),
+  });
+}
+
+export function useUpdateApplication() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: ApplicationInput }) =>
+      api
+        .patch<{ application: Application }>(`/api/applications/${id}`, input)
+        .then((res) => res.application),
+    onSuccess: () => qc.invalidateQueries({ queryKey: APPLICATIONS_KEY }),
+  });
+}
+
+export function useDeleteApplication() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.del<void>(`/api/applications/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: APPLICATIONS_KEY }),
   });
 }
